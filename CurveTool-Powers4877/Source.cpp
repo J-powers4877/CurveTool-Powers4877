@@ -18,35 +18,44 @@ int main(int argc, char* argv[])
 	namedWindow("Test", WINDOW_NORMAL);
 	resizeWindow("Test", 500, 500);
 
-	int sliderBrightness = 50;
-	createTrackbar("Brightness", "Test", &sliderBrightness, 100);
-
-	int sliderContrast = 50;
-	createTrackbar("Contrast", "Test", &sliderContrast, 100);
-
-	int g_switch_value = 0;
-	createTrackbar("Switch", "Test", &g_switch_value, 1);
-
 	double dFrames = cap.get(CAP_PROP_POS_FRAMES);
+
+	int sliderBrightness = -1;
+	int sliderContrast = -1;
 
 	while (true)
 	{
-		Mat frame;
+		createTrackbar("Brightness", "Test", &sliderBrightness, 100);
 
-		cap >> frame;
+		createTrackbar("Contrast", "Test", &sliderContrast, 100);
 
-		if (frame.empty())
-			break;
+		int iBrightness = sliderBrightness - 50;
+		double dContrast = sliderContrast / 50.0;
 
-		/*
-		Display in new window first, once user hits button, push to full video.
-		*/
-		imshow("Frame", frame);
-
-		if (g_switch_value == 1)
+		if (sliderBrightness == -1)
 		{
-			imshow("Frame", frame);
+			sliderBrightness = 50;
 		}
+		if (sliderContrast == -1)
+		{
+			sliderContrast = 50;
+		}
+
+		Mat oFrame;
+		Mat nFrame;
+
+		cap.read(oFrame);
+		cap.read(nFrame);
+
+		oFrame.convertTo(nFrame, -1, dContrast, iBrightness);
+
+		if (nFrame.empty() || oFrame.empty())
+		{
+			break;
+		}
+
+		imshow("Original Video", oFrame);
+		imshow("New Video", nFrame);
 
 		int iKey = waitKey(20);
 

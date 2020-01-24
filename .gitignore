@@ -338,3 +338,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/CurveTool-Powers4877/opencv_videoio_ffmpeg420_64.dll
+/CurveTool-Powers4877/opencv_world420.dll
+/CurveTool-Powers4877/opencv_world420d.dll
