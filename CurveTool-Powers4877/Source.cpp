@@ -2,9 +2,64 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <Windows.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 using namespace std;
 using namespace cv;
+
+//Creates the Histogram for the frames
+//windowName is the name of the Histogram Window Name; Don't make it same as video output
+//frame is the name of the frame to grab the histogram from
+void show_histogram(string windowName, Mat frame)
+{
+	int histogram[256];
+
+	for (int i = 0; i < 255; i++)
+	{
+		histogram[i] = 0;
+	}
+
+	// calculate the n of pixels for each intensity values
+	for (int y = 0; y < frame.rows; y++)
+		for (int x = 0; x < frame.cols; x++)
+			histogram[(int)frame.at<uchar>(y, x)]++;
+
+
+	// draw the histograms
+	int hist_w = 512; int hist_h = 400;
+	int bin_w = cvRound((double)hist_w / 256);
+
+	Mat histImage(hist_h, hist_w, CV_8UC1, Scalar(255, 255, 255));
+
+	// find the maximum intensity element from histogram
+	int max = histogram[0];
+	for (int i = 1; i < 256; i++) {
+		if (max < histogram[i]) {
+			max = histogram[i];
+		}
+	}
+
+	// normalize the histogram between 0 and histImage.rows
+
+	for (int i = 0; i < 255; i++) {
+		histogram[i] = ((double)histogram[i] / max) * histImage.rows;
+	}
+
+
+	// draw the intensity line for histogram
+	for (int i = 0; i < 255; i++)
+	{
+		line(histImage, Point(bin_w * (i), hist_h),
+			Point(bin_w * (i), hist_h - histogram[i]),
+			Scalar(0, 0, 0), 1, 8, 0);
+	}
+
+	// display histogram
+	imshow(windowName, histImage);
+
+	waitKey(25);
+	return;
+}
 
 int main(int argc, char* argv[])
 {
@@ -108,8 +163,12 @@ int main(int argc, char* argv[])
 
 		//Display Original Video from originalFrame
 		imshow("Original Video", originalFrame);
+		//Display Histogram for Original Video
+		show_histogram("Original Histogram",originalFrame);
 		//Display changed video from newFrame
 		imshow("New Video", newFrame);
+		//Display Histogram for newFrame
+		show_histogram("New Histogram", newFrame);
 
 		//iKey: Integer; Checks to see if key has been pressed for 20 ms
 		int iKey = waitKey(20);
@@ -145,7 +204,7 @@ int main(int argc, char* argv[])
 			changedCap.retrieve(savedFrame);
 			savedFrame.convertTo(savedFrame, -1, dContrast, iBrightness);
 
-			cout << "Saving video" << endl;
+			cout << "Saving frame." << endl;
 			oVideoWriter.write(savedFrame); 
 			waitKey(10);
 		}
