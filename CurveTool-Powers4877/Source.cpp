@@ -8,52 +8,52 @@ using namespace cv;
 
 int main(int argc, char* argv[])
 {
-	//cap: Capture object; Used for showing the Original Video
-	VideoCapture cap("../barriers.avi");
-	//oCap: Capture object; Used for saving the Changed video
-	VideoCapture oCap("../barriers.avi");
+	//originalCap: Capture object; Used for showing the Original Video
+	VideoCapture originalCap("../barriers.avi");
+	//changedCap: Capture object; Used for saving the Changed video
+	VideoCapture changedCap("../barriers.avi");
 
-	//oFrame: Mat object; Used with the Original Video
-	Mat oFrame;
-	//nFrame: Mat object; Used with the New, Changed Video
-	Mat nFrame;
-	//Test: Mat object; Used to with the Final, Saved Video
-	Mat Test;
+	//originalFrame: Mat object; Used with the Original Video
+	Mat originalFrame;
+	//newFrame: Mat object; Used with the New, Changed Video
+	Mat newFrame;
+	//savedFrame: Mat object; Used to with the Final, Saved Video
+	Mat savedFrame;
 
-	//sliderBrightness: Integer; Used for setting Brightness Slider Starting Value
-	int sliderBrightness = -1;
-	//sliderContrast: Integer; Used for setting Contrast Slider Starting Value
-	int sliderContrast = -1;
+	//iSliderBrightness: Integer; Used for setting Brightness Slider Starting Value
+	int iSliderBrightness = -1;
+	//iSliderContrast: Integer; Used for setting Contrast Slider Starting Value
+	int iSliderContrast = -1;
 
 	//iBrightness: Interger; Used to get Brightness adjustment.
 	int iBrightness = 0;
 	//dContrast: Double; Used to get Contrast Adjustment.
 	double dContrast = 0;
 
-	//frame_counter: Integer; Used to keep track of what frame the video is on
-	int frame_counter = 0;
-	//fps: Integer; Populated from Original Video; Used to match input video FPS when saving
-	int fps = cap.get(CAP_PROP_FPS);
+	//iFrameCounter: Integer; Used to keep track of what frame the video is on
+	int iFrameCounter = 0;
+	//iFPS: Integer; Populated from Original Video; Used to match input video FPS when saving
+	int iFPS = originalCap.get(CAP_PROP_FPS);
 
-	//frame_width: Integer; Populated from Original Video; Used to in frame_size
-	int frame_width = static_cast<int>(cap.get(CAP_PROP_FRAME_WIDTH));
-	//frame_height: Integer; Populated from Original Video; Used in frame_size
-	int frame_height = static_cast<int>(cap.get(CAP_PROP_FRAME_HEIGHT));
+	//iFrameWidth: Integer; Populated from Original Video; Used to in frameSize
+	int iFrameWidth = static_cast<int>(originalCap.get(CAP_PROP_FRAME_WIDTH));
+	//iFrameHeight: Integer; Populated from Original Video; Used in frameSize
+	int iFrameHeight = static_cast<int>(originalCap.get(CAP_PROP_FRAME_HEIGHT));
 
-	//frame_size: Size object; Populted from frame_width & frame_height; Used to match input & output window sizes
-	Size frame_size(frame_width, frame_height);
+	//frameSize: Size object; Populted from iFrameWidth & iFrameHeight; Used to match input & output window sizes
+	Size frameSize(iFrameWidth, iFrameHeight);
 
 	//oVideoWriter: VideoWriter object; Used to create final, edited video and save it
-	VideoWriter oVideoWriter("../MyVideo.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, frame_size, true);
+	VideoWriter oVideoWriter("../MyVideo.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), iFPS, frameSize, true);
 
-	//Create "Test" window for sliders
-	namedWindow("Test", WINDOW_NORMAL);
+	//Create "Sliders" window for sliders
+	namedWindow("Sliders", WINDOW_NORMAL);
 	//Set "Test" window size
-	resizeWindow("Test", 500, 500);
+	resizeWindow("Sliders", 500, 500);
 
-	//Check if cap was opened;
+	//Check if originalCap was opened;
 	//If not, print error and return -1
-	if (!cap.isOpened())
+	if (!originalCap.isOpened())
 	{
 		cout << "Error reading image!" << endl;
 		return -1;
@@ -62,54 +62,54 @@ int main(int argc, char* argv[])
 	//First Loop; Used for user to change video contrast/brightness; Esc key used to progress to save loop 
 	while (true)
 	{
-		//frame_counter++;
+		//iFrameCounter++;
 
-		//if (frame_counter == frames) {
-		//	cap.set(CAP_PROP_POS_FRAMES, 0);
+		//if (iFrameCounter == frames) {
+		//	originalCap.set(CAP_PROP_POS_FRAMES, 0);
 		//}
 
 		//Creation of Brightness slider/trackbar
-		createTrackbar("Brightness", "Test", &sliderBrightness, 100);
+		createTrackbar("Brightness", "Sliders", &iSliderBrightness, 100);
 		//Creation of Contrast slider/trackbar
-		createTrackbar("Contrast", "Test", &sliderContrast, 100);
+		createTrackbar("Contrast", "Sliders", &iSliderContrast, 100);
 
 		//Get brightness value from slider, subtract starting value to increase or decrease brightness
-		iBrightness = sliderBrightness - 50;
+		iBrightness = iSliderBrightness - 50;
 		//Get contrast value from slider, divide by 50.0 to get value to increase or decrease contrast
-		dContrast = sliderContrast / 50.0;
+		dContrast = iSliderContrast / 50.0;
 
-		//Check if sliderBrightness is -1 / hasn't been changed
+		//Check if iSliderBrightness is -1 / hasn't been changed
 		//If so, set it to equal 50
-		if (sliderBrightness == -1)
+		if (iSliderBrightness == -1)
 		{
-			sliderBrightness = 50;
+			iSliderBrightness = 50;
 		}
-		//Check if sliderContrast is -1 / hasn't been changed
+		//Check if iSliderContrast is -1 / hasn't been changed
 		//If so, set it to equal 50
-		if (sliderContrast == -1)
+		if (iSliderContrast == -1)
 		{
-			sliderContrast = 50;
+			iSliderContrast = 50;
 		}
 
-		//Read new frame in from cap to oFrame
-		cap.read(oFrame);
-		//Read new frame in from cap to nFrame
-		cap.read(nFrame);
+		//Read new frame in from originalCap to originalFrame
+		originalCap.read(originalFrame);
+		//Read new frame in from originalCap to newFrame
+		originalCap.read(newFrame);
 
-		//Set user adjusted Brightness and Contrast to nFrame
-		oFrame.convertTo(nFrame, -1, dContrast, iBrightness);
+		//Set user adjusted Brightness and Contrast to newFrame
+		originalFrame.convertTo(newFrame, -1, dContrast, iBrightness);
 
 		//Check if the current frame is empty on either
 		//If so, break the while loop.
-		if (nFrame.empty() || oFrame.empty())
+		if (newFrame.empty() || originalFrame.empty())
 		{
 			break;
 		}
 
-		//Display Original Video from oFrame
-		imshow("Original Video", oFrame);
-		//Display changed video from nFrame
-		imshow("New Video", nFrame);
+		//Display Original Video from originalFrame
+		imshow("Original Video", originalFrame);
+		//Display changed video from newFrame
+		imshow("New Video", newFrame);
 
 		//iKey: Integer; Checks to see if key has been pressed for 20 ms
 		int iKey = waitKey(20);
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 	{
 		//canGrab: Boolean; True if next frame can be grabbed/non-empty, 
 		//	     False if next frame cannot be grabbed/is empty
-		bool canGrab = oCap.grab();
+		bool canGrab = changedCap.grab();
 
 		//Check if canGrab is false
 		//If false, print error, break loop.
@@ -142,19 +142,19 @@ int main(int argc, char* argv[])
 		//Wait
 		else
 		{
-			oCap.retrieve(Test);
-			Test.convertTo(Test, -1, dContrast, iBrightness);
+			changedCap.retrieve(savedFrame);
+			savedFrame.convertTo(savedFrame, -1, dContrast, iBrightness);
 
 			cout << "Saving video" << endl;
-			oVideoWriter.write(Test); 
+			oVideoWriter.write(savedFrame); 
 			waitKey(10);
 		}
 	}
 
 	// When everything done, release the video capture object
 	oVideoWriter.release();
-	oCap.release();
-	cap.release();
+	changedCap.release();
+	originalCap.release();
 
 	// Closes all the frames
 	return 0;
